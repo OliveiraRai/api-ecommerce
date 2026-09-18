@@ -1,1 +1,5 @@
 django
+djangorestframework
+pytest
+pytest-django
+psycopg2-binary
