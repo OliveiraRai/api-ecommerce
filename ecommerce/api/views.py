@@ -1,6 +1,11 @@
-from django.shortcuts import render
-from django.http import HttpResponse
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from .models import Produto
+from .serializers import ProdutoSerializer
 
-# Create your views here.
-def Home(request):
-    return HttpResponse("Working!")
+@api_view(["GET"]) # rota só aceita leitura (GET)
+def list_products(request):
+    products = Produto.objects.all()
+    translator = ProdutoSerializer(products, many=True)
+    return Response(translator.data)
+    
