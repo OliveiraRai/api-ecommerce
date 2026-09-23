@@ -1,3 +1,4 @@
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .models import Produto
@@ -7,15 +8,35 @@ from .serializers import ProdutoSerializer
 @api_view(["GET"]) 
 def list_products(request):
     # Não é necessário validação, pois o rest_framework 
-    # retornará uma lista vazia [] com status 200 OK
-    
+    # retornará uma lista vazia [] com status 200 OK    
     products = Produto.objects.all()
     
     # many=True faz o rest_framework lidar com os dados 
     # de products como uma lista, seja vazia ou não
-    translator = ProdutoSerializer(products, many=True)
+    serializer = ProdutoSerializer(products, many=True)
     
     # retorna [], [{}], ou [{}, ...]
-    return Response(translator.data)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
-# TODO view para criar produto
+@api_view(["POST"])
+def create_product(request):
+    # deserializa request com 'request.data'
+    serializer = ProdutoSerializer(data=request.data)
+    
+    # validação básica
+    if serializer.is_valid():
+        serializer.save() # save() salva no db
+        return Response(serializer.data, status=status.HTTP_201_CREATED) # retorno de acordo com a realidade
+    
+    # visualizar erros
+    print(serializer.errors)
+    
+    return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST) # retorno de acordo com a realidade
+
+@api_view(["POST"])
+def create_client(request):
+    pass # TODO
+
+@api_view(["POST"])
+def create_seller(request):
+    pass # TODO

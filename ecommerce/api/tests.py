@@ -1,10 +1,14 @@
-from django.test import TestCase
+from django.urls import reverse
+from rest_framework import status
+from rest_framework.test import APITestCase
 from .serializers import ProdutoSerializer, CategoriaSerializer, ClienteSerializer, VendedorSerializer, VendaSerializer, ItensVendaSerializer
 from .models import Produto, Categoria, Cliente, Vendedor, Venda, ItensVenda
 import bcrypt
 from datetime import date
 
-class CategoriaSerializerTestCase(TestCase):
+## testes dos models
+
+class CategoriaSerializerTestCase(APITestCase):
     def setUp(self):
         self.categoria = Categoria.objects.create(
             nome = "Periférico",
@@ -17,7 +21,7 @@ class CategoriaSerializerTestCase(TestCase):
         self.assertEqual(data["nome"], "Periférico")
         self.assertIn("id", data)
 
-class ProdutoSerializerTestCase(TestCase):
+class ProdutoSerializerTestCase(APITestCase):
     def setUp(self):
         self.categoria = Categoria.objects.create(nome = "Periférico")
         
@@ -39,7 +43,7 @@ class ProdutoSerializerTestCase(TestCase):
         self.assertEqual(data["estoque"], 5)
         self.assertIn("produto_id", data)        
 
-class ClienteSerializerTestCase(TestCase):
+class ClienteSerializerTestCase(APITestCase):
     def setUp(self):
         password = b'MinhaSenha22'
         salt = bcrypt.gensalt()
@@ -66,7 +70,7 @@ class ClienteSerializerTestCase(TestCase):
         self.assertEqual(data["criado_em"], str(date.today()))
         self.assertIn("cliente_id", data)
 
-class VendedorSerializerTestCase(TestCase):
+class VendedorSerializerTestCase(APITestCase):
     def setUp(self):
         password = b'MinhaSenha13'
         salt = bcrypt.gensalt()
@@ -93,7 +97,7 @@ class VendedorSerializerTestCase(TestCase):
         self.assertEqual(data["criado_em"], str(date.today()))
         self.assertIn("vendedor_id", data)
         
-class VendaSerializerTestCase(TestCase):
+class VendaSerializerTestCase(APITestCase):
     def setUp(self):
         # cliente
         password_1 = b'MinhaSenha22'
@@ -168,3 +172,48 @@ class VendaSerializerTestCase(TestCase):
         self.assertEqual(itens_venda_data["quantidade"], self.quantity)
         self.assertEqual(itens_venda_data["valor_praticado"], '200.00')
         self.assertIn("item_id", itens_venda_data)
+        
+## testes das rotas
+
+class ListarProdutosTestCase(APITestCase):
+    def setUp(self):
+        # reverse usa o name="" de uma url para manter um código DRY (Don't Repeat Yourself)
+        self.url = reverse('ListProducts')
+        
+        # criar categoria para o produto
+        self.categoria = Categoria.objects.create(nome="Periférico")
+        
+        # criar produto
+        self.produto = Produto.objects.create(
+            nome = "Teclado Mecânico",
+            categoria = self.categoria,
+            preco = 200,
+            estoque = 1,
+        )
+        
+    def test_listar_produtos_retorna_lista_vazia(self):
+        response = self.client.get(self.url, format='json')
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(Produto.objects.count(), 1)
+
+class CriarProdutoTestCase(APITestCase):
+    def setUp(self):
+        self.categoria = Categoria.objects.create(nome="Periférico")
+        self.categoria_serialized = CategoriaSerializer(self.categoria)
+        self.data = self.categoria_serialized.data
+        
+        self.url = reverse('CreateProduct')
+        self.dados = {
+            "nome": "Teclado Mecânico",
+            "categoria": self.data["id"],
+            "preco": 200,
+            "estoque": 1,
+        }
+        
+    def test_criar_produto_retorna_id(self):
+        response = self.client.post(self.url, self.dados, format='json')
+        data = response.data
+        
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertIn("produto_id", data)
