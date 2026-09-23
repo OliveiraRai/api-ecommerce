@@ -3,9 +3,19 @@ from rest_framework.decorators import api_view
 from .models import Produto
 from .serializers import ProdutoSerializer
 
-@api_view(["GET"]) # rota só aceita leitura (GET)
+# Listagem de Produtos
+@api_view(["GET"]) 
 def list_products(request):
-    products = Produto.objects.all()
-    translator = ProdutoSerializer(products, many=True)
-    return Response(translator.data)
+    # Não é necessário validação, pois o rest_framework 
+    # retornará uma lista vazia [] com status 200 OK
     
+    products = Produto.objects.all()
+    
+    # many=True faz o rest_framework lidar com os dados 
+    # de products como uma lista, seja vazia ou não
+    translator = ProdutoSerializer(products, many=True)
+    
+    # retorna [], [{}], ou [{}, ...]
+    return Response(translator.data)
+
+# TODO view para criar produto

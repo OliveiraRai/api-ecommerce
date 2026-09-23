@@ -3,20 +3,20 @@ import uuid
 
 # Create your models here.
 class Vendedor(models.Model):
-    vendedor = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    vendedor_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     nome = models.CharField(max_length=255)
-    cnpj_cpf = models.CharField(max_length=18)
-    celular = models.CharField(max_length=15)
-    email = models.EmailField(max_length=255)
+    cnpj_cpf = models.CharField(max_length=18, unique=True)
+    celular = models.CharField(max_length=15, unique=True)
+    email = models.EmailField(max_length=255, unique=True)
     senha = models.CharField(max_length=128) # will be hashed
     criado_em = models.DateField(auto_now_add=True)  
     
 class Cliente(models.Model):
     cliente_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     nome = models.CharField(max_length=255)
-    cpf = models.CharField(max_length=14)
-    celular = models.CharField(max_length=15)
-    email = models.EmailField(max_length=255)
+    cpf = models.CharField(max_length=14, unique=True)
+    celular = models.CharField(max_length=15, unique=True)
+    email = models.EmailField(max_length=255, unique=True)
     senha = models.CharField(max_length=128) # will be hashed
     criado_em = models.DateField(auto_now_add=True)
     
@@ -36,7 +36,7 @@ class Produto(models.Model):
     estoque = models.IntegerField(default=0)
     
 class Categoria(models.Model):
-    nome = models.CharField(max_length=100)
+    nome = models.CharField(max_length=100, unique=True)
     
     def __str__(self):
         return self.nome # para resolver nomes genericos (object (1))
