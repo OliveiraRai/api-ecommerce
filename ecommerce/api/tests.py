@@ -217,3 +217,51 @@ class CriarProdutoTestCase(APITestCase):
         
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertIn("produto_id", data)
+
+class CriarClienteTestCase(APITestCase):
+    def setUp(self):
+        password = b'MinhaSenha22'
+        salt = bcrypt.gensalt()
+        
+        self.hashed_pw = bcrypt.hashpw(password=password, salt=salt)
+        
+        self.url = reverse('CreateCustomer')
+        self.dados = {
+            "nome": "John Doe",
+            "cpf": "555.555.555-55",
+            "celular": "(55) 55555-5555",
+            "email": "john.doe@gmail.com",
+            "senha": self.hashed_pw,
+        }
+        
+    def test_criar_cliente_retorna_dados(self):
+        response = self.client.post(self.url, self.dados, format="json")
+        data = response.data
+        
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(data["senha"].encode('utf-8'), self.dados["senha"])
+        self.assertIn("cliente_id", data)
+
+class CriarVendedorTestCase(APITestCase):
+    def setUp(self):
+        password = b'MinhaSenha22'
+        salt = bcrypt.gensalt()
+        
+        self.hashed_pw = bcrypt.hashpw(password=password, salt=salt)
+        
+        self.url = reverse('CreateSeller')
+        self.dados = {
+            "nome": "John Doe",
+            "cnpj_cpf": "55.555.555/5555-55",
+            "celular": "(55) 55555-5555",
+            "email": "john.doe@gmail.com",
+            "senha": self.hashed_pw,
+        }
+        
+    def test_criar_vendedor_retorna_dados(self):
+        response = self.client.post(self.url, self.dados, format="json")
+        data = response.data
+        
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(data["senha"].encode('utf-8'), self.hashed_pw)
+        self.assertIn("vendedor_id", data)

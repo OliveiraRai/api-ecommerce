@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .models import Produto
-from .serializers import ProdutoSerializer
+from .serializers import ProdutoSerializer, ClienteSerializer, VendedorSerializer
 
 # Listagem de Produtos
 @api_view(["GET"]) 
@@ -28,15 +28,24 @@ def create_product(request):
         serializer.save() # save() salva no db
         return Response(serializer.data, status=status.HTTP_201_CREATED) # retorno de acordo com a realidade
     
-    # visualizar erros
-    print(serializer.errors)
-    
     return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST) # retorno de acordo com a realidade
 
 @api_view(["POST"])
-def create_client(request):
-    pass # TODO
+def create_customer(request):
+    serializer = ClienteSerializer(data=request.data)
+    
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["POST"])
 def create_seller(request):
-    pass # TODO
+    serializer = VendedorSerializer(data=request.data)
+    
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
